@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StepHeader } from "@/components/StepHeader";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import type { DocumentType } from "@/pages/Index";
 
 interface PhotoVariationsProps {
@@ -18,19 +20,51 @@ export const PhotoVariations = ({
   onBack,
 }: PhotoVariationsProps) => {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [variations, setVariations] = useState<string[]>([]);
+  const { toast } = useToast();
 
-  // Simulate AI processing - in production, this would call n8n workflow
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // For demo, we'll use the original photo with slight variations (simulated)
-      setVariations([originalPhoto, originalPhoto, originalPhoto, originalPhoto]);
-      setLoading(false);
-    }, 2500);
+    const processPhoto = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-    return () => clearTimeout(timer);
-  }, [originalPhoto]);
+        const { data, error: fnError } = await supabase.functions.invoke('process-photo', {
+          body: { photo: originalPhoto, documentType }
+        });
+
+        if (fnError) {
+          console.error('Edge function error:', fnError);
+          throw new Error(fnError.message || 'Failed to process photo');
+        }
+
+        // Expect n8n to return { variations: [...] }
+        if (data?.variations && Array.isArray(data.variations)) {
+          setVariations(data.variations);
+        } else {
+          // Fallback: use original photo as all 4 variations (for testing)
+          console.warn('No variations returned from n8n, using original photo');
+          setVariations([originalPhoto, originalPhoto, originalPhoto, originalPhoto]);
+        }
+      } catch (err) {
+        console.error('Error processing photo:', err);
+        setError(err instanceof Error ? err.message : 'Failed to process photo');
+        // Fallback to original photo for demo purposes
+        setVariations([originalPhoto, originalPhoto, originalPhoto, originalPhoto]);
+        toast({
+          title: "Using preview mode",
+          description: "Could not connect to n8n workflow. Showing original photo as preview.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    processPhoto();
+  }, [originalPhoto, documentType, toast]);
 
   const documentLabels: Record<DocumentType, string> = {
     passport: "Passport",
