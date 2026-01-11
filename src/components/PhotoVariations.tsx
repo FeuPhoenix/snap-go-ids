@@ -31,8 +31,32 @@ export const PhotoVariations = ({
         setLoading(true);
         setError(null);
 
+        // Extract base64 data from data URL if present
+        let imageBase64 = originalPhoto;
+        let mimeType = 'image/png';
+        
+        if (originalPhoto.startsWith('data:')) {
+          const matches = originalPhoto.match(/^data:([^;]+);base64,(.+)$/);
+          if (matches) {
+            mimeType = matches[1];
+            imageBase64 = matches[2];
+          }
+        }
+
+        // Map document type to photo type label
+        const photoTypeMap: Record<DocumentType, string> = {
+          passport: 'Passport (40x60mm)',
+          visa: 'Visa Photo',
+          id: 'ID Card Photo',
+        };
+
         const { data, error: fnError } = await supabase.functions.invoke('process-photo', {
-          body: { photo: originalPhoto, documentType }
+          body: { 
+            image: imageBase64,
+            photoType: photoTypeMap[documentType],
+            includeShoulders: true,
+            mimeType
+          }
         });
 
         if (fnError) {
@@ -40,9 +64,13 @@ export const PhotoVariations = ({
           throw new Error(fnError.message || 'Failed to process photo');
         }
 
-        // Expect n8n to return { variations: [...] }
-        if (data?.variations && Array.isArray(data.variations)) {
-          setVariations(data.variations);
+        // Handle n8n response format with variations array
+        if (data?.success && data?.variations && Array.isArray(data.variations)) {
+          const variationUrls = data.variations.map((v: { imageBase64: string; mimeType?: string }) => {
+            // Convert base64 back to data URL for display
+            return `data:${v.mimeType || 'image/png'};base64,${v.imageBase64}`;
+          });
+          setVariations(variationUrls);
         } else {
           // Fallback: use original photo as all 4 variations (for testing)
           console.warn('No variations returned from n8n, using original photo');

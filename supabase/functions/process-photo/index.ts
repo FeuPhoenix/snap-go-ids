@@ -12,11 +12,11 @@ serve(async (req) => {
   }
 
   try {
-    const { photo, documentType } = await req.json();
+    const { image, photoType, includeShoulders, mimeType } = await req.json();
 
-    if (!photo || !documentType) {
+    if (!image) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: photo and documentType' }),
+        JSON.stringify({ error: 'No image provided. Please include base64 encoded image in request body.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -30,18 +30,19 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Processing ${documentType} photo, sending to n8n workflow...`);
+    console.log(`Processing ${photoType || 'photo'}, sending to n8n workflow...`);
 
-    // Call the n8n webhook with the photo data
+    // Call the n8n webhook with the expected format
     const n8nResponse = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        photo,
-        documentType,
-        timestamp: new Date().toISOString(),
+        image,
+        photoType: photoType || 'Passport (40x60mm)',
+        includeShoulders: includeShoulders !== false,
+        mimeType: mimeType || 'image/png',
       }),
     });
 
