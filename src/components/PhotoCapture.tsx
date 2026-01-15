@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Camera, RotateCcw, ArrowLeft, Check, AlertCircle, Lightbulb, Focus } from "lucide-react";
+import { Camera, RotateCcw, Check, AlertCircle, Lightbulb, Focus, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StepHeader } from "@/components/StepHeader";
 
@@ -17,6 +17,7 @@ interface ValidationState {
 export const PhotoCapture = ({ onPhotoCapture, onBack }: PhotoCaptureProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -92,6 +93,23 @@ export const PhotoCapture = ({ onPhotoCapture, onBack }: PhotoCaptureProps) => {
   const retakePhoto = () => {
     setCapturedImage(null);
     startCamera();
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setCapturedImage(result);
+      stopCamera();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
   };
 
   const confirmPhoto = () => {
@@ -189,20 +207,45 @@ export const PhotoCapture = ({ onPhotoCapture, onBack }: PhotoCaptureProps) => {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-4">
             {!capturedImage ? (
-              <Button
-                variant="hero"
-                size="xl"
-                className="flex-1"
-                onClick={capturePhoto}
-                disabled={isCapturing}
-              >
-                <Camera className="w-5 h-5 mr-2" />
-                Capture Photo
-              </Button>
-            ) : (
               <>
+                <div className="flex gap-4">
+                  <Button
+                    variant="hero"
+                    size="xl"
+                    className="flex-1"
+                    onClick={capturePhoto}
+                    disabled={isCapturing}
+                  >
+                    <Camera className="w-5 h-5 mr-2" />
+                    Capture Photo
+                  </Button>
+                </div>
+                <div className="relative flex items-center">
+                  <div className="flex-1 border-t border-border"></div>
+                  <span className="px-4 text-sm text-muted-foreground">or</span>
+                  <div className="flex-1 border-t border-border"></div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                  onClick={triggerFileUpload}
+                >
+                  <Upload className="w-5 h-5 mr-2" />
+                  Upload Photo
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </>
+            ) : (
+              <div className="flex gap-4">
                 <Button
                   variant="outline"
                   size="lg"
@@ -221,7 +264,7 @@ export const PhotoCapture = ({ onPhotoCapture, onBack }: PhotoCaptureProps) => {
                   <Check className="w-5 h-5 mr-2" />
                   Use This Photo
                 </Button>
-              </>
+              </div>
             )}
           </div>
         </div>
