@@ -68,19 +68,19 @@ export const DocumentTypeSelection = ({ onSelect, onBack }: DocumentTypeSelectio
               <button
                 key={doc.id}
                 onClick={() => onSelect(doc.id)}
-                className="w-full bg-card rounded-2xl p-6 shadow-card hover:shadow-card-lg transition-all duration-300 text-left group hover:scale-[1.01] active:scale-[0.99]"
+                className="w-full glass rounded-2xl p-6 shadow-card hover:shadow-card-lg transition-all duration-300 text-left group hover:scale-[1.01] active:scale-[0.99]"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="font-display text-xl font-semibold text-foreground group-hover:text-secondary transition-colors">
                       {doc.title}
                     </h3>
-                    <span className="inline-block mt-1 px-3 py-1 bg-blue-soft/20 text-secondary rounded-full text-sm font-medium">
+                    <span className="inline-block mt-1 px-3 py-1 bg-accent/10 text-accent border border-border/60 rounded-full text-sm font-medium">
                       {doc.size}
                     </span>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Check className="w-5 h-5 text-primary-foreground" />
+                  <div className="w-10 h-10 rounded-full bg-gradient-accent flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-accent">
+                    <Check className="w-5 h-5 text-accent-foreground" />
                   </div>
                 </div>
 
@@ -91,7 +91,7 @@ export const DocumentTypeSelection = ({ onSelect, onBack }: DocumentTypeSelectio
                 <div className="grid grid-cols-2 gap-2">
                   {doc.requirements.map((req, index) => (
                     <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-accent" />
                       {req}
                     </div>
                   ))}

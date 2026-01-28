@@ -38,7 +38,7 @@ export const DeliveryConfirmation = ({
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-xl mx-auto">
           {/* Selected photo preview */}
-          <div className="bg-card rounded-2xl p-6 shadow-card mb-6 animate-fade-in">
+          <div className="glass rounded-2xl p-6 shadow-card mb-6 animate-fade-in">
             <h3 className="font-semibold text-foreground mb-4">Your Selected Photo</h3>
             <div className="aspect-[3/4] max-w-[200px] mx-auto rounded-xl overflow-hidden bg-muted">
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -48,10 +48,10 @@ export const DeliveryConfirmation = ({
           </div>
 
           {/* Download option */}
-          <div className="bg-card rounded-2xl p-6 shadow-card mb-6 animate-fade-in">
+          <div className="glass rounded-2xl p-6 shadow-card mb-6 animate-fade-in">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-soft/20 flex items-center justify-center">
-                <Download className="w-6 h-6 text-secondary" />
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                <Download className="w-6 h-6 text-accent" />
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-foreground">Digital Download</h3>
@@ -59,12 +59,12 @@ export const DeliveryConfirmation = ({
                   High-resolution photo ready for digital use
                 </p>
               </div>
-              <span className="text-lg font-bold text-secondary">Free</span>
+              <span className="text-lg font-bold text-accent">Free</span>
             </div>
           </div>
 
           {/* Print option */}
-          <div className="bg-card rounded-2xl p-6 shadow-card mb-6 animate-fade-in">
+          <div className="glass rounded-2xl p-6 shadow-card mb-6 animate-fade-in">
             <div className="flex items-start gap-4 mb-4">
               <Checkbox
                 id="print-option"
@@ -88,7 +88,7 @@ export const DeliveryConfirmation = ({
             {wantsPrint && (
               <div className="mt-6 pt-6 border-t border-border animate-slide-up">
                 <Label htmlFor="address" className="flex items-center gap-2 mb-3">
-                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <MapPin className="w-4 h-4 text-accent" />
                   Delivery Address
                 </Label>
                 <Input
@@ -106,7 +106,7 @@ export const DeliveryConfirmation = ({
           </div>
 
           {/* Summary */}
-          <div className="bg-primary/5 rounded-2xl p-6 mb-8">
+          <div className="glass rounded-2xl p-6 mb-8 shadow-card">
             <h4 className="font-semibold text-foreground mb-3">Order Summary</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
