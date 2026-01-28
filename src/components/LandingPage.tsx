@@ -1,11 +1,32 @@
 import { Camera, FileCheck, Printer, ArrowRight, Shield, Clock, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 interface LandingPageProps {
   onGetStarted: () => void;
 }
 
 export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
+  const [mockEnabled, setMockEnabled] = useState(false);
+
+  useEffect(() => {
+    try {
+      setMockEnabled(localStorage.getItem('use_mock_ai') === 'true');
+    } catch {
+      setMockEnabled(false);
+    }
+  }, []);
+
+  const toggleMock = () => {
+    const next = !mockEnabled;
+    setMockEnabled(next);
+    try {
+      localStorage.setItem('use_mock_ai', next ? 'true' : 'false');
+    } catch {
+      // ignore
+    }
+  };
+
   const steps = [
     {
       icon: Camera,
@@ -67,6 +88,13 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
                 Learn More
               </Button>
             </div>
+            {import.meta.env.DEV && (
+              <div className="mt-6 flex justify-center">
+                <Button variant="outline" size="sm" onClick={toggleMock}>
+                  {mockEnabled ? 'Mock AI: ON' : 'Mock AI: OFF'}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 

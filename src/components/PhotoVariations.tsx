@@ -6,6 +6,33 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { DocumentType } from "@/pages/Index";
 
+type ProcessPhotoVariation = { imageBase64: string; mimeType?: string };
+type ProcessPhotoResponse = { success?: boolean; variations?: ProcessPhotoVariation[] };
+
+const getTesterToken = (): string | null => {
+  try {
+    const raw = localStorage.getItem('tester_auth');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { token?: string; expiresAt?: number };
+    if (!parsed?.token || !parsed?.expiresAt) return null;
+    if (Date.now() > parsed.expiresAt) {
+      localStorage.removeItem('tester_auth');
+      return null;
+    }
+    return parsed.token;
+  } catch {
+    return null;
+  }
+};
+
+const isMockAiEnabled = (): boolean => {
+  try {
+    return localStorage.getItem('use_mock_ai') === 'true';
+  } catch {
+    return false;
+  }
+};
+
 interface PhotoVariationsProps {
   documentType: DocumentType;
   originalPhoto: string;
@@ -31,6 +58,12 @@ export const PhotoVariations = ({
         setLoading(true);
         setError(null);
 
+        const testerToken = getTesterToken();
+        if (!testerToken) {
+          window.location.assign('/unauthorized');
+          return;
+        }
+
         // Extract base64 data from data URL if present
         let imageBase64 = originalPhoto;
         let mimeType = 'image/png';
@@ -50,18 +83,79 @@ export const PhotoVariations = ({
           id: 'ID Card Photo',
         };
 
-        const { data, error: fnError } = await supabase.functions.invoke('process-photo', {
-          body: { 
-            image: imageBase64,
-            photoType: photoTypeMap[documentType],
-            includeShoulders: true,
-            mimeType
-          }
-        });
+        const requestBody = { 
+          image: imageBase64,
+          photoType: photoTypeMap[documentType],
+          includeShoulders: true,
+          mimeType,
+        };
 
-        if (fnError) {
-          console.error('Edge function error:', fnError);
-          throw new Error(fnError.message || 'Failed to process photo');
+        const mockEnabled = isMockAiEnabled();
+        const data: ProcessPhotoResponse | null = mockEnabled
+          ? await (async () => {
+              const res = await fetch('/api/process-photo', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-tester-auth': testerToken,
+                },
+                body: JSON.stringify(requestBody),
+              });
+
+              if (res.status === 401) {
+                window.location.assign('/unauthorized');
+                return null;
+              }
+              if (res.status === 429) {
+                const msg = 'Too many requests. Please wait a minute and try again.';
+                setError(msg);
+                toast({
+                  title: 'Rate limit reached',
+                  description: msg,
+                  variant: 'destructive',
+                });
+                return null;
+              }
+              if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Failed to process photo');
+              }
+
+              return (await res.json()) as ProcessPhotoResponse;
+            })()
+          : await (async () => {
+              const { data: fnData, error: fnError } = await supabase.functions.invoke('process-photo', {
+                headers: {
+                  'x-tester-auth': testerToken,
+                },
+                body: requestBody,
+              });
+
+              if (fnError) {
+                console.error('Edge function error:', fnError);
+                const status = (fnError as unknown as { status?: number })?.status;
+                if (status === 401) {
+                  window.location.assign('/unauthorized');
+                  return null;
+                }
+                if (status === 429) {
+                  const msg = 'Too many requests. Please wait a minute and try again.';
+                  setError(msg);
+                  toast({
+                    title: 'Rate limit reached',
+                    description: msg,
+                    variant: 'destructive',
+                  });
+                  return null;
+                }
+                throw new Error(fnError.message || 'Failed to process photo');
+              }
+
+              return fnData as ProcessPhotoResponse;
+            })();
+
+        if (data === null) {
+          return;
         }
 
         // Handle n8n response format with variations array
@@ -123,6 +217,19 @@ export const PhotoVariations = ({
                 Our AI is generating {documentLabels[documentType].toLowerCase()} photo variations 
                 optimized for official requirements...
               </p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-6">
+                <AlertCircle className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <h3 className="font-display text-2xl font-semibold text-foreground mb-2">
+                Can&apos;t process right now
+              </h3>
+              <p className="text-muted-foreground text-center max-w-md mb-6">{error}</p>
+              <Button variant="outline" onClick={onBack}>
+                Go back
+              </Button>
             </div>
           ) : (
             <div className="animate-slide-up">
