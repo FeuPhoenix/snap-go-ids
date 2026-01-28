@@ -68,12 +68,13 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
       {/* Hero Section */}
       <section className="bg-gradient-hero text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.22),transparent_65%)] blur-3xl" />
         
         <div className="container mx-auto px-4 py-20 lg:py-32 relative">
           <div className="max-w-3xl mx-auto text-center animate-slide-up">
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Professional ID Photos
-              <span className="block text-blue-soft">From Your Device</span>
+            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-wide">
+              <span className="text-gradient">SnapStation</span>
+              <span className="block text-blue-soft">AI Photo Studio</span>
             </h1>
             <p className="text-lg md:text-xl text-blue-soft mb-10 max-w-2xl mx-auto leading-relaxed">
               Create passport, visa, and ID photos that meet official requirements. 
@@ -122,13 +123,13 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
             {steps.map((step, index) => (
               <div
                 key={step.title}
-                className="relative bg-card rounded-2xl p-8 shadow-card hover:shadow-card-lg transition-all duration-300 group"
+                className="relative glass rounded-2xl p-8 shadow-card hover:shadow-card-lg transition-all duration-300 group"
               >
                 <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-accent rounded-full flex items-center justify-center text-accent-foreground font-bold text-lg shadow-accent">
                   {index + 1}
                 </div>
-                <div className="w-16 h-16 bg-blue-soft/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <step.icon className="w-8 h-8 text-secondary" />
+                <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <step.icon className="w-8 h-8 text-accent" />
                 </div>
                 <h3 className="font-display text-xl font-semibold text-foreground mb-3">
                   {step.title}
@@ -164,8 +165,8 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
       {/* CTA */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="bg-gradient-hero rounded-3xl p-10 md:p-16 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(102,155,188,0.2),transparent_70%)]" />
+          <div className="glass rounded-3xl p-10 md:p-16 text-center relative overflow-hidden shadow-card-lg">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--accent)/0.16),transparent_70%)]" />
             <div className="relative">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
                 Ready to Get Started?
